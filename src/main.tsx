@@ -7,6 +7,8 @@ import { Provider } from "react-redux";
 import { store } from "@/store";
 import GlobalContextProvider from "@/context/globalContext";
 import ThemeProvider from "@/context/themeContext";
+import { AudioPlayerProvider } from "@/context/audioPlayerContext";
+import { AuthProvider } from "@/context/authContext";
 import ErrorBoundary from "@/common/ErrorBoundary";
 import App from "./App";
 import "./index.css";
@@ -27,13 +29,17 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <ErrorBoundary>
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Provider store={store}>
-          <ThemeProvider>
-            <GlobalContextProvider>
-              <LazyMotion features={domAnimation}>
-                <App />
-              </LazyMotion>
-            </GlobalContextProvider>
-          </ThemeProvider>
+          <AuthProvider>
+            <ThemeProvider>
+              <GlobalContextProvider>
+                <AudioPlayerProvider>
+                  <LazyMotion features={domAnimation}>
+                    <App />
+                  </LazyMotion>
+                </AudioPlayerProvider>
+              </GlobalContextProvider>
+            </ThemeProvider>
+          </AuthProvider>
         </Provider>
       </BrowserRouter>
     </ErrorBoundary>

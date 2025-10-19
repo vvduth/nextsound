@@ -10,9 +10,13 @@ import { Button } from "react-aria-components";
 
 import { ThemeMenu, Logo } from "..";
 import HeaderNavItem from "./HeaderNavItem";
+import { AuthModal } from "@/components/ui/AuthModal";
+import { UserProfileDropdown } from "@/components/ui/UserProfileDropdown";
+import { Button as UIButton } from "@/components/ui/button";
 
 import { useGlobalContext } from "@/context/globalContext";
 import { useTheme } from "@/context/themeContext";
+import { useAuth } from "@/context/authContext";
 import { maxWidth } from "@/styles";
 import { navLinks } from "@/constants";
 import { THROTTLE_DELAY } from "@/utils/config";
@@ -25,9 +29,11 @@ interface HeaderProps {
 const Header = ({ onOpenSearch }: HeaderProps) => {
   const { openMenu, theme, showThemeOptions } = useTheme();
   const { setShowSidebar } = useGlobalContext();
+  const { user, loading } = useAuth();
 
   const [isActive, setIsActive] = useState<boolean>(false);
   const [isNotFoundPage, setIsNotFoundPage] = useState<boolean>(false);
+  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -139,7 +145,30 @@ const Header = ({ onOpenSearch }: HeaderProps) => {
               {showThemeOptions && <ThemeMenu />}
             </AnimatePresence>
           </div>
+
+          {/* Auth Section */}
+          {!loading && (
+            <>
+              {user ? (
+                <UserProfileDropdown />
+              ) : (
+                <UIButton
+                  onClick={() => setShowAuthModal(true)}
+                  variant="default"
+                  size="sm"
+                  className="bg-orange-500 hover:bg-orange-600 text-white"
+                >
+                  Sign In
+                </UIButton>
+              )}
+            </>
+          )}
         </div>
+
+        <AuthModal 
+          isOpen={showAuthModal} 
+          onClose={() => setShowAuthModal(false)} 
+        />
 
         <button
           type="button"

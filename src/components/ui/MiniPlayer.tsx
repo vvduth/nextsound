@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Button } from 'react-aria-components';
+import { Button } from './button';
 import {
   FiPlay,
   FiPause,
@@ -15,8 +15,7 @@ import {
   FiMaximize2
 } from 'react-icons/fi';
 import { ITrack } from '@/types';
-import { getImageUrl } from '@/utils/helper';
-import { cn } from '@/utils/helper';
+import { getImageUrl, cn } from '@/utils';
 
 interface MiniPlayerProps {
   currentTrack?: ITrack | null;
@@ -96,6 +95,16 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
     onToggleFavorite?.();
   };
 
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!progressRef.current) return;
+    const rect = progressRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = (x / rect.width) * 100;
+    const clampedPercentage = Math.max(0, Math.min(100, percentage));
+    setLocalProgress(clampedPercentage);
+    onSeek?.(clampedPercentage);
+  };
+
   const duration = currentTrack.duration || 180000; // Fallback to 3 minutes
   const currentTime = (localProgress / 100) * duration / 1000;
   const totalTime = duration / 1000;
@@ -113,13 +122,17 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             className="w-10 h-10 rounded-full object-cover"
           />
           <Button
-            onPress={onTogglePlay}
+            onClick={onTogglePlay}
+            variant="ghost"
+            size="icon"
             className="flex items-center justify-center w-8 h-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors duration-200"
           >
             {isPlaying ? <FiPause className="w-4 h-4" /> : <FiPlay className="w-4 h-4 ml-0.5" />}
           </Button>
           <Button
-            onPress={onToggleMinimize}
+            onClick={onToggleMinimize}
+            variant="ghost"
+            size="icon"
             className="flex items-center justify-center w-6 h-6 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors duration-200"
           >
             <FiMaximize2 className="w-3 h-3" />
@@ -135,7 +148,11 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       className
     )}>
       {/* Progress bar - full width at top */}
-      <div className="w-full h-1 bg-gray-200 dark:bg-gray-700 cursor-pointer group" ref={progressRef}>
+      <div 
+        className="w-full h-1 bg-gray-200 dark:bg-gray-700 cursor-pointer group" 
+        ref={progressRef}
+        onClick={handleProgressClick}
+      >
         <div 
           className="h-full bg-blue-600 transition-all duration-100 rounded-full relative group-hover:bg-blue-500"
           style={{ width: `${localProgress}%` }}
@@ -175,7 +192,9 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
           </div>
           
           <Button
-            onPress={handleFavoriteClick}
+            onClick={handleFavoriteClick}
+            variant="ghost"
+            size="icon"
             className={cn(
               "flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 hover:scale-110",
               isFavorite 
@@ -191,7 +210,9 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
         <div className="flex items-center space-x-4 px-8">
           {/* Shuffle */}
           <Button
-            onPress={onToggleShuffle}
+            onClick={onToggleShuffle}
+            variant="ghost"
+            size="icon"
             className={cn(
               "flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 hover:scale-110",
               isShuffled 
@@ -204,7 +225,9 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
 
           {/* Previous */}
           <Button
-            onPress={onSkipPrevious}
+            onClick={onSkipPrevious}
+            variant="ghost"
+            size="icon"
             className="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-all duration-200 hover:scale-110"
           >
             <FiSkipBack className="w-5 h-5" />
@@ -212,7 +235,9 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
 
           {/* Play/Pause */}
           <Button
-            onPress={onTogglePlay}
+            onClick={onTogglePlay}
+            variant="ghost"
+            size="icon"
             className="flex items-center justify-center w-12 h-12 bg-gray-900 hover:bg-black dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 rounded-full shadow-lg transition-all duration-200 hover:scale-105"
           >
             {isPlaying ? (
@@ -224,7 +249,9 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
 
           {/* Next */}
           <Button
-            onPress={onSkipNext}
+            onClick={onSkipNext}
+            variant="ghost"
+            size="icon"
             className="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-all duration-200 hover:scale-110"
           >
             <FiSkipForward className="w-5 h-5" />
@@ -232,7 +259,9 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
 
           {/* Repeat */}
           <Button
-            onPress={onToggleRepeat}
+            onClick={onToggleRepeat}
+            variant="ghost"
+            size="icon"
             className={cn(
               "flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 hover:scale-110 relative",
               repeatMode !== 'off' 
@@ -261,7 +290,9 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             onMouseLeave={() => setShowVolumeSlider(false)}
           >
             <Button
-              onPress={handleVolumeClick}
+              onClick={handleVolumeClick}
+              variant="ghost"
+              size="icon"
               className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors duration-200"
             >
               {isMuted || volume === 0 ? (
@@ -292,13 +323,19 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
           </div>
 
           {/* More options */}
-          <Button className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors duration-200">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors duration-200"
+          >
             <FiMoreHorizontal className="w-4 h-4" />
           </Button>
 
           {/* Minimize */}
           <Button
-            onPress={onToggleMinimize}
+            onClick={onToggleMinimize}
+            variant="ghost"
+            size="icon"
             className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors duration-200"
           >
             <FiMinimize2 className="w-4 h-4" />

@@ -20,3 +20,8 @@ export const SPOTIFY_API_BASE_URL = USE_BACKEND_PROXY
   : 'https://api.spotify.com/v1';
 
 export const THROTTLE_DELAY = 150;
+
+// Supabase configuration
+// Students: Add your Supabase project URL and anon key here or in .env file
+export const SUPABASE_URL: string = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
+export const SUPABASE_ANON_KEY: string = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-anon-key';

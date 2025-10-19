@@ -1,13 +1,26 @@
-import React, { useState } from 'react';
+/**
+ * TrackCard Component
+ * 
+ * ✅ AUTHENTICATED UPVOTING ENABLED
+ * - Shows auth modal when user tries to upvote without being logged in
+ * - Tracks per-user upvotes in database
+ */
+import React, { useState, useEffect } from 'react';
 import { Button } from './button';
 import { Card, CardContent } from './card';
+import { AuthModal } from './AuthModal';
 import {
   FaPlay,
   FaPause,
-  FaClock
+  FaClock,
+  FaArrowUp,
+  FaSpotify
 } from 'react-icons/fa';
 import { ITrack } from '@/types';
 import { getImageUrl, cn } from '@/utils';
+import { supabaseService } from '@/services/SupabaseService';
+import { useAudioPlayerContext } from '@/context/audioPlayerContext';
+import { useAuth } from '@/context/authContext';
 
 interface TrackCardProps {
   track: ITrack;
@@ -16,29 +29,115 @@ interface TrackCardProps {
   onPlay?: (track: ITrack) => void;
   variant?: 'compact' | 'detailed' | 'featured';
   className?: string;
+  onAuthRequired?: () => void;
 }
 
 export const TrackCard: React.FC<TrackCardProps> = ({
   track,
   category: _category,
-  isPlaying = false,
-  onPlay,
+  isPlaying: _isPlayingProp,
+  onPlay: _onPlayProp,
   variant = 'detailed',
-  className
+  className,
+  onAuthRequired
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [isUpvoted, setIsUpvoted] = useState(false);
+  const [upvoteCount, setUpvoteCount] = useState(0);
+  const [isLoadingUpvote, setIsLoadingUpvote] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const { currentTrack, isPlaying: globalIsPlaying, playTrack } = useAudioPlayerContext();
+  const { user } = useAuth();
 
   const { poster_path, original_title: title, name, artist, album, duration } = track;
   const displayTitle = title || name || 'Unknown Track';
+  const trackId = track.spotify_id || track.id;
+
+  // Check if this track is currently playing
+  const isPlaying = currentTrack?.id === track.id && globalIsPlaying;
+
+  // Fetch upvote data from Supabase on component mount
+  useEffect(() => {
+    const fetchUpvoteData = async () => {
+      // Get total upvote count
+      const count = await supabaseService.getTotalUpvoteCount(trackId);
+      setUpvoteCount(count);
+      
+      // Check if current user has upvoted (requires authentication)
+      if (user) {
+        const userUpvote = await supabaseService.getUserUpvote(trackId);
+        setIsUpvoted(!!userUpvote);
+      } else {
+        setIsUpvoted(false);
+      }
+    };
+
+    fetchUpvoteData();
+  }, [trackId, user]);
 
 
   const handlePlayClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     console.log('🎯 TrackCard: Play button clicked for track:', track.name || track.original_title);
-    console.log('🎯 TrackCard: onPlay function available:', !!onPlay);
-    onPlay?.(track);
+    playTrack(track);
+  };
+
+  const handleUpvoteClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (isLoadingUpvote) return; // Prevent multiple clicks
+
+    // Check if user is authenticated
+    if (!user) {
+      // Show auth modal if not authenticated
+      setShowAuthModal(true);
+      if (onAuthRequired) {
+        onAuthRequired();
+      }
+      return;
+    }
+
+    setIsLoadingUpvote(true);
+
+    try {
+      // Toggle upvote (add or remove) - requires authentication
+      const newState = await supabaseService.toggleUpvote(trackId);
+      
+      if (newState !== null) {
+        setIsUpvoted(newState);
+        
+        // Refresh the total count
+        const newCount = await supabaseService.getTotalUpvoteCount(trackId);
+        setUpvoteCount(newCount);
+      }
+    } catch (error) {
+      console.error('Error handling upvote:', error);
+    } finally {
+      setIsLoadingUpvote(false);
+    }
+  };
+
+  const handleOpenSpotify = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!track.spotify_id) return;
+
+    // Try to open in Spotify app first, fallback to web player
+    const spotifyAppUrl = `spotify:track:${track.spotify_id}`;
+    const spotifyWebUrl = `https://open.spotify.com/track/${track.spotify_id}`;
+
+    // Attempt to open in app
+    window.location.href = spotifyAppUrl;
+
+    // Fallback to web player after a short delay
+    setTimeout(() => {
+      window.open(spotifyWebUrl, '_blank');
+    }, 500);
   };
 
 
@@ -123,7 +222,27 @@ export const TrackCard: React.FC<TrackCardProps> = ({
             </Button>
           </div>
 
-
+          {/* Open in Spotify button */}
+          {track.spotify_id && (
+            <div className={cn(
+              "absolute bottom-3 right-3 transition-all duration-300",
+              isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+            )}>
+              <Button
+                onClick={handleOpenSpotify}
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "w-10 h-10 rounded-full shadow-lg transition-all duration-200",
+                  "bg-[#1DB954] hover:bg-[#1ed760]",
+                  "hover:scale-110 text-white"
+                )}
+                aria-label="Open in Spotify"
+              >
+                <FaSpotify className="w-5 h-5" />
+              </Button>
+            </div>
+          )}
 
           {/* Playing indicator */}
           {isPlaying && (
@@ -139,6 +258,31 @@ export const TrackCard: React.FC<TrackCardProps> = ({
               </div>
             </div>
           )}
+
+          {/* Upvote button */}
+          <button
+            onClick={handleUpvoteClick}
+            disabled={isLoadingUpvote}
+            className={cn(
+              "absolute top-3 right-3 flex flex-col items-center justify-center gap-0.5 px-2.5 py-1.5 rounded-lg backdrop-blur-sm transition-all duration-200 hover:scale-105 z-10 group/upvote",
+              isUpvoted
+                ? "bg-accent-orange/90 hover:bg-accent-orange"
+                : "bg-black/40 hover:bg-black/60",
+              isLoadingUpvote && "opacity-50 cursor-not-allowed"
+            )}
+            aria-label={isUpvoted ? "Remove upvote" : "Upvote track"}
+          >
+            <FaArrowUp className={cn(
+              "w-3.5 h-3.5 transition-colors",
+              isUpvoted ? "text-white" : "text-white/90"
+            )} />
+            <span className={cn(
+              "text-xs font-semibold transition-colors",
+              isUpvoted ? "text-white" : "text-white/90"
+            )}>
+              {upvoteCount}
+            </span>
+          </button>
         </div>
 
         {/* Track information */}
@@ -187,6 +331,13 @@ export const TrackCard: React.FC<TrackCardProps> = ({
         "dark:bg-gradient-to-r dark:from-blue-800 dark:via-slate-600 dark:to-blue-800",
         isHovered && "opacity-10"
       )} />
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        defaultView="signin"
+      />
     </Card>
   );
 };
