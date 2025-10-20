@@ -1,82 +1,55 @@
 import { supabase } from './supabaseClient';
-import { ISongUpvote } from '@/types';
 
 /**
- * SupabaseService - Handles all interactions with Supabase for song upvotes
+ * SupabaseService - Handles all interactions with Supabase for track upvotes
  * 
- * ✅ AUTHENTICATED UPVOTING ENABLED
+ * ✅ NO AUTHENTICATION REQUIRED
  * 
  * Features:
- * - User authentication required for upvoting
- * - Per-user upvote tracking via database
- * - RLS policies enforce user-specific access
+ * - Anonymous upvoting (no auth needed)
+ * - Local storage tracking for user's upvoted tracks
+ * - Global upvote counts stored in database
  */
+
+const UPVOTED_TRACKS_KEY = 'nextsound_upvoted_tracks';
+
 class SupabaseService {
   constructor() {
     // No initialization needed - all data is stored in database
   }
 
   /**
-   * Check if user is authenticated
+   * Get user's upvoted tracks from localStorage
    */
-  private async isAuthenticated(): Promise<boolean> {
+  private getLocalUpvotedTracks(): Set<string> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      return !!user;
-    } catch (error) {
-      console.error('Error checking authentication:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Get current authenticated user
-   */
-  private async getCurrentUser() {
-    try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error) throw error;
-      return user;
-    } catch (error) {
-      console.error('Error getting current user:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Check if current user has upvoted a track
-   */
-  async hasUserUpvoted(trackId: string): Promise<boolean> {
-    const upvote = await this.getUserUpvote(trackId);
-    return !!upvote;
-  }
-
-  /**
-   * Get upvote for a specific track by the current user
-   */
-  async getUserUpvote(trackId: string): Promise<ISongUpvote | null> {
-    try {
-      const user = await this.getCurrentUser();
-      if (!user) return null;
-
-      const { data, error } = await supabase
-        .from('song_upvotes')
-        .select('*')
-        .eq('track_id', trackId)
-        .eq('user_id', user.id)
-        .single();
-
-      if (error) {
-        if (error.code === 'PGRST116') return null; // No rows found
-        console.error('Error fetching user upvote:', error);
-        return null;
+      const stored = localStorage.getItem(UPVOTED_TRACKS_KEY);
+      if (stored) {
+        return new Set(JSON.parse(stored));
       }
-
-      return data;
     } catch (error) {
-      console.error('Error fetching user upvote:', error);
-      return null;
+      console.error('Error reading from localStorage:', error);
     }
+    return new Set();
+  }
+
+  /**
+   * Save user's upvoted tracks to localStorage
+   */
+  private saveLocalUpvotedTracks(tracks: Set<string>): void {
+    try {
+      localStorage.setItem(UPVOTED_TRACKS_KEY, JSON.stringify(Array.from(tracks)));
+    } catch (error) {
+      console.error('Error writing to localStorage:', error);
+    }
+  }
+
+  /**
+   * Check if current user has upvoted a track (using localStorage)
+   */
+  hasUserUpvoted(trackId: string): boolean {
+    const upvotedTracks = this.getLocalUpvotedTracks();
+    return upvotedTracks.has(trackId);
   }
 
   /**
@@ -84,17 +57,18 @@ class SupabaseService {
    */
   async getTotalUpvoteCount(trackId: string): Promise<number> {
     try {
-      const { count, error } = await supabase
-        .from('song_upvotes')
-        .select('*', { count: 'exact', head: true })
-        .eq('track_id', trackId);
+      const { data, error } = await supabase
+        .from('track_upvotes')
+        .select('upvote_count')
+        .eq('track_id', trackId)
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching total upvote count:', error);
         return 0;
       }
 
-      return count || 0;
+      return data?.upvote_count || 0;
     } catch (error) {
       console.error('Error fetching total upvote count:', error);
       return 0;
@@ -102,69 +76,106 @@ class SupabaseService {
   }
 
   /**
-   * Add an upvote for a track (authenticated users only)
+   * Add an upvote for a track (no auth required)
    */
-  async addUpvote(trackId: string): Promise<ISongUpvote | null> {
+  async addUpvote(trackId: string): Promise<boolean> {
     try {
-      const user = await this.getCurrentUser();
-      if (!user) {
-        console.warn('User must be authenticated to upvote');
-        return null;
-      }
-
-      // Check if user has already upvoted
-      const existing = await this.getUserUpvote(trackId);
-      if (existing) {
+      // Check if user has already upvoted locally
+      const upvotedTracks = this.getLocalUpvotedTracks();
+      if (upvotedTracks.has(trackId)) {
         console.warn('User has already upvoted this track');
-        return existing;
+        return false;
       }
 
-      // Insert new upvote
-      const { data, error } = await supabase
-        .from('song_upvotes')
-        .insert({
-          track_id: trackId,
-          user_id: user.id,
-        })
-        .select()
-        .single();
+      // Check if track exists in database
+      const { data: existingTrack } = await supabase
+        .from('track_upvotes')
+        .select('id, upvote_count')
+        .eq('track_id', trackId)
+        .maybeSingle();
 
-      if (error) {
-        console.error('Error adding upvote:', error);
-        return null;
+      if (existingTrack) {
+        // Increment existing upvote count
+        const { error } = await supabase
+          .from('track_upvotes')
+          .update({ 
+            upvote_count: existingTrack.upvote_count + 1,
+            updated_at: new Date().toISOString()
+          })
+          .eq('track_id', trackId);
+
+        if (error) {
+          console.error('Error updating upvote:', error);
+          return false;
+        }
+      } else {
+        // Create new track upvote record
+        const { error } = await supabase
+          .from('track_upvotes')
+          .insert({
+            track_id: trackId,
+            upvote_count: 1,
+          });
+
+        if (error) {
+          console.error('Error creating upvote:', error);
+          return false;
+        }
       }
 
-      return data;
+      // Save to localStorage
+      upvotedTracks.add(trackId);
+      this.saveLocalUpvotedTracks(upvotedTracks);
+
+      return true;
     } catch (error) {
       console.error('Error adding upvote:', error);
-      return null;
+      return false;
     }
   }
 
   /**
-   * Remove an upvote for a track (authenticated users only)
+   * Remove an upvote for a track (no auth required)
    */
   async removeUpvote(trackId: string): Promise<boolean> {
     try {
-      const user = await this.getCurrentUser();
-      if (!user) {
-        console.warn('User must be authenticated to remove upvote');
+      // Check if user has upvoted locally
+      const upvotedTracks = this.getLocalUpvotedTracks();
+      if (!upvotedTracks.has(trackId)) {
+        console.warn('User has not upvoted this track');
         return false;
       }
 
-      // Delete the upvote
-      const { error } = await supabase
-        .from('song_upvotes')
-        .delete()
+      // Get current track data
+      const { data: existingTrack } = await supabase
+        .from('track_upvotes')
+        .select('id, upvote_count')
         .eq('track_id', trackId)
-        .eq('user_id', user.id);
+        .maybeSingle();
 
-      if (error) {
-        console.error('Error removing upvote:', error);
-        return false;
+      if (existingTrack && existingTrack.upvote_count > 0) {
+        // Decrement upvote count
+        const { error } = await supabase
+          .from('track_upvotes')
+          .update({ 
+            upvote_count: existingTrack.upvote_count - 1,
+            updated_at: new Date().toISOString()
+          })
+          .eq('track_id', trackId);
+
+        if (error) {
+          console.error('Error removing upvote:', error);
+          return false;
+        }
+
+        // Remove from localStorage
+        upvotedTracks.delete(trackId);
+        this.saveLocalUpvotedTracks(upvotedTracks);
+
+        return true;
       }
 
-      return true;
+      return false;
     } catch (error) {
       console.error('Error removing upvote:', error);
       return false;
@@ -172,29 +183,23 @@ class SupabaseService {
   }
 
   /**
-   * Toggle upvote for a track (authenticated users only)
-   * Returns true if upvoted, false if removed, null if failed or not authenticated
+   * Toggle upvote for a track (no auth required)
+   * Returns true if upvoted, false if removed
    */
-  async toggleUpvote(trackId: string): Promise<boolean | null> {
+  async toggleUpvote(trackId: string): Promise<boolean> {
     try {
-      const isAuth = await this.isAuthenticated();
-      if (!isAuth) {
-        console.warn('User must be authenticated to toggle upvote');
-        return null;
-      }
+      const hasUpvoted = this.hasUserUpvoted(trackId);
 
-      const existingUpvote = await this.getUserUpvote(trackId);
-
-      if (existingUpvote) {
+      if (hasUpvoted) {
         const success = await this.removeUpvote(trackId);
-        return success ? false : null;
+        return !success; // Return false if successfully removed
       } else {
-        const newUpvote = await this.addUpvote(trackId);
-        return newUpvote ? true : null;
+        const success = await this.addUpvote(trackId);
+        return success; // Return true if successfully added
       }
     } catch (error) {
       console.error('Error toggling upvote:', error);
-      return null;
+      return false;
     }
   }
 
@@ -205,17 +210,28 @@ class SupabaseService {
     try {
       if (trackIds.length === 0) return new Map();
 
-      // Get counts for each track
-      const countPromises = trackIds.map(async (trackId) => {
-        const count = await this.getTotalUpvoteCount(trackId);
-        return { trackId, count };
+      const { data, error } = await supabase
+        .from('track_upvotes')
+        .select('track_id, upvote_count')
+        .in('track_id', trackIds);
+
+      if (error) {
+        console.error('Error fetching bulk upvote counts:', error);
+        return new Map();
+      }
+
+      const countMap = new Map<string, number>();
+      
+      // Add all tracks with their counts
+      data?.forEach(item => {
+        countMap.set(item.track_id, item.upvote_count || 0);
       });
 
-      const results = await Promise.all(countPromises);
-      
-      const countMap = new Map<string, number>();
-      results.forEach(({ trackId, count }) => {
-        countMap.set(trackId, count);
+      // Add tracks that don't exist in DB yet with count 0
+      trackIds.forEach(trackId => {
+        if (!countMap.has(trackId)) {
+          countMap.set(trackId, 0);
+        }
       });
 
       return countMap;
@@ -226,27 +242,23 @@ class SupabaseService {
   }
 
   /**
-   * Check which tracks the current user has upvoted (authenticated users only)
+   * Check which tracks the current user has upvoted (using localStorage)
    */
-  async getUserUpvotedTracks(trackIds: string[]): Promise<Set<string>> {
+  getUserUpvotedTracks(trackIds: string[]): Set<string> {
     try {
-      const user = await this.getCurrentUser();
-      if (!user) return new Set();
-
       if (trackIds.length === 0) return new Set();
 
-      const { data, error } = await supabase
-        .from('song_upvotes')
-        .select('track_id')
-        .eq('user_id', user.id)
-        .in('track_id', trackIds);
+      const upvotedTracks = this.getLocalUpvotedTracks();
+      
+      // Filter to only include tracks from the provided list
+      const filteredTracks = new Set<string>();
+      trackIds.forEach(trackId => {
+        if (upvotedTracks.has(trackId)) {
+          filteredTracks.add(trackId);
+        }
+      });
 
-      if (error) {
-        console.error('Error fetching user upvoted tracks:', error);
-        return new Set();
-      }
-
-      return new Set(data.map(item => item.track_id));
+      return filteredTracks;
     } catch (error) {
       console.error('Error fetching user upvoted tracks:', error);
       return new Set();

@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from './card';
 import {
-  FaClock
+  FaClock,
+  FaHeart,
+  FaRegHeart
 } from 'react-icons/fa';
 import { ITrack } from '@/types';
 import { getImageUrl, cn } from '@/utils';
+import { supabaseService } from '@/services/SupabaseService';
 
 interface TrackCardProps {
   track: ITrack;
@@ -25,9 +28,49 @@ export const TrackCard: React.FC<TrackCardProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [upvoteCount, setUpvoteCount] = useState(0);
+  const [hasUpvoted, setHasUpvoted] = useState(false);
+  const [isUpvoting, setIsUpvoting] = useState(false);
 
   const { poster_path, original_title: title, name, artist, album, duration } = track;
   const displayTitle = title || name || 'Unknown Track';
+
+  // Load upvote data on mount
+  useEffect(() => {
+    const loadUpvoteData = async () => {
+      if (!track.id) return;
+      
+      // Check if user has upvoted
+      const userUpvoted = supabaseService.hasUserUpvoted(track.id);
+      setHasUpvoted(userUpvoted);
+      
+      // Get total upvote count
+      const count = await supabaseService.getTotalUpvoteCount(track.id);
+      setUpvoteCount(count);
+    };
+
+    loadUpvoteData();
+  }, [track.id]);
+
+  const handleUpvoteClick = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    
+    if (isUpvoting || !track.id) return;
+    
+    setIsUpvoting(true);
+    
+    try {
+      const newUpvotedState = await supabaseService.toggleUpvote(track.id);
+      setHasUpvoted(newUpvotedState);
+      
+      // Update count locally for instant feedback
+      setUpvoteCount(prev => newUpvotedState ? prev + 1 : Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Error toggling upvote:', error);
+    } finally {
+      setIsUpvoting(false);
+    }
+  };
 
   const formatDuration = (ms: number) => {
     if (!ms) return '';
@@ -86,6 +129,35 @@ export const TrackCard: React.FC<TrackCardProps> = ({
             "absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent transition-opacity duration-300 rounded-lg",
             isHovered ? "opacity-100" : "opacity-0"
           )} />
+
+          {/* Upvote button - positioned on image */}
+          <button
+            onClick={handleUpvoteClick}
+            disabled={isUpvoting}
+            className={cn(
+              "absolute top-2 right-2 z-10",
+              "flex items-center gap-1 px-2.5 py-1.5 rounded-full",
+              "bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm",
+              "border border-gray-200 dark:border-gray-700",
+              "transition-all duration-200",
+              "hover:scale-110 hover:bg-white dark:hover:bg-gray-800",
+              "active:scale-95",
+              isUpvoting && "opacity-50 cursor-not-allowed"
+            )}
+            title={hasUpvoted ? "Remove upvote" : "Upvote this track"}
+          >
+            {hasUpvoted ? (
+              <FaHeart className="w-3.5 h-3.5 text-red-500" />
+            ) : (
+              <FaRegHeart className="w-3.5 h-3.5 text-gray-600 dark:text-gray-300" />
+            )}
+            <span className={cn(
+              "text-xs font-semibold",
+              hasUpvoted ? "text-red-500" : "text-gray-700 dark:text-gray-200"
+            )}>
+              {upvoteCount}
+            </span>
+          </button>
         </div>
 
         {/* Track information */}
