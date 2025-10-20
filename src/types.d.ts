@@ -127,3 +127,21 @@ export interface IArtist {
   };
 }
 
+// Supabase interfaces
+export interface ISongUpvote {
+  id: string;
+  track_id: string;
+  user_id: string; // Required - references auth.users
+  created_at: string;
+  updated_at: string;
+}
+
+export interface IUserProfile {
+  id: string;
+  username: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  created_at: string;
+  updated_at: string;
+}
+

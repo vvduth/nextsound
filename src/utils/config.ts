@@ -22,5 +22,6 @@ export const SPOTIFY_API_BASE_URL = USE_BACKEND_PROXY
 export const THROTTLE_DELAY = 150;
 
 // Supabase configuration
-export const SUPABASE_URL: string = import.meta.env.VITE_SUPABASE_URL || 'https://uslwkrdsnixifauxuqgo.supabase.co';
-export const SUPABASE_ANON_KEY: string = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzbHdrcmRzbml4aWZhdXh1cWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3NDUwOTUsImV4cCI6MjA3NjMyMTA5NX0.RhQP6dogPyXYXA7zRUwIX1xJNB7jjNwSZ_MqULtKTxs';
+// Students: Add your Supabase project URL and anon key here or in .env file
+export const SUPABASE_URL: string = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
+export const SUPABASE_ANON_KEY: string = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-anon-key';
