@@ -10,9 +10,14 @@ import { Button } from "react-aria-components";
 
 import { ThemeMenu, Logo } from "..";
 import HeaderNavItem from "./HeaderNavItem";
+// TODO: Uncomment these imports when enabling auth functionality
+// import { AuthModal } from "@/components/ui/AuthModal";
+// import { UserProfileDropdown } from "@/components/ui/UserProfileDropdown";
 
 import { useGlobalContext } from "@/context/globalContext";
 import { useTheme } from "@/context/themeContext";
+// TODO: Uncomment this import when enabling auth functionality
+// import { useAuth } from "@/context/authContext";
 import { maxWidth } from "@/styles";
 import { navLinks } from "@/constants";
 import { THROTTLE_DELAY } from "@/utils/config";
@@ -25,9 +30,14 @@ interface HeaderProps {
 const Header = ({ onOpenSearch }: HeaderProps) => {
   const { openMenu, theme, showThemeOptions } = useTheme();
   const { setShowSidebar } = useGlobalContext();
+  // TODO: Uncomment these when enabling auth functionality
+  // const { user } = useAuth();
 
   const [isActive, setIsActive] = useState<boolean>(false);
   const [isNotFoundPage, setIsNotFoundPage] = useState<boolean>(false);
+  // TODO: Uncomment these state variables when enabling auth functionality
+  // const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
+  // const [authView, setAuthView] = useState<'signin' | 'signup'>('signup');
   const location = useLocation();
 
   useEffect(() => {
@@ -139,6 +149,43 @@ const Header = ({ onOpenSearch }: HeaderProps) => {
               {showThemeOptions && <ThemeMenu />}
             </AnimatePresence>
           </div>
+
+          {/* Auth Buttons - Hidden for now, uncomment to enable */}
+          {/* TODO: Uncomment this section to enable Sign In / Sign Up functionality */}
+          {/* {user ? (
+            <UserProfileDropdown />
+          ) : (
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setAuthView('signin');
+                  setShowAuthModal(true);
+                }}
+                className={cn(
+                  "px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200",
+                  isNotFoundPage || isActive
+                    ? "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                    : "text-gray-300 hover:text-white"
+                )}
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => {
+                  setAuthView('signup');
+                  setShowAuthModal(true);
+                }}
+                className={cn(
+                  "px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 border",
+                  isNotFoundPage || isActive
+                    ? "bg-orange-600 text-white border-orange-600 hover:bg-orange-700 hover:border-orange-700"
+                    : "bg-orange-600/90 text-white border-orange-600/90 hover:bg-orange-600"
+                )}
+              >
+                Sign Up
+              </button>
+            </div>
+          )} */}
         </div>
 
         <button
@@ -155,6 +202,14 @@ const Header = ({ onOpenSearch }: HeaderProps) => {
           <AiOutlineMenu />
         </button>
       </nav>
+
+      {/* Auth Modal - Hidden for now, uncomment to enable */}
+      {/* TODO: Uncomment this section to enable Sign In / Sign Up modal */}
+      {/* <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        defaultView={authView}
+      /> */}
     </header>
   );
 };

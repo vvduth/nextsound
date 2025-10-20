@@ -80,7 +80,7 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:5173` - the app works immediately with demo data.
+Open `http://localhost:5174` - the app works immediately with demo data.
 
 <br>
 
@@ -152,7 +152,7 @@ npm run preview
 - **Reference:** See `SPOTIFY_SETUP.md` for obtaining API credentials
 
 **Port Conflicts**
-- **Frontend (Port 5173):** Check if another Vite/dev server is running
+- **Frontend (Port 5174):** Check if another Vite/dev server is running
 - **Backend (Port 3001):** Check if another Express server is using the port
 - **Solution:** Kill existing processes or modify port configuration
 

@@ -91,12 +91,12 @@ export const AuthModal = ({ isOpen, onClose, defaultView = 'signin' }: AuthModal
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-white">
+          <DialogTitle className="text-2xl font-bold text-gray-900">
             {view === 'signin' && 'Sign In'}
             {view === 'signup' && 'Create Account'}
             {view === 'reset' && 'Reset Password'}
           </DialogTitle>
-          <DialogDescription className="text-gray-600 dark:text-gray-400">
+          <DialogDescription className="text-gray-600">
             {view === 'signin' && 'Sign in to upvote your favorite tracks'}
             {view === 'signup' && 'Create an account to start upvoting'}
             {view === 'reset' && 'Enter your email to reset your password'}
@@ -105,19 +105,19 @@ export const AuthModal = ({ isOpen, onClose, defaultView = 'signin' }: AuthModal
 
         <form onSubmit={view === 'signin' ? handleSignIn : view === 'signup' ? handleSignUp : handleResetPassword} className="space-y-4">
           {error && (
-            <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-md">
+            <div className="p-3 text-sm text-red-700 bg-red-50 rounded-md">
               {error}
             </div>
           )}
           
           {success && (
-            <div className="p-3 text-sm text-green-500 bg-green-50 dark:bg-green-900/20 rounded-md">
+            <div className="p-3 text-sm text-green-700 bg-green-50 rounded-md">
               {success}
             </div>
           )}
 
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium text-gray-900 dark:text-white">
+            <label htmlFor="email" className="text-sm font-medium text-gray-900">
               Email
             </label>
             <Input
@@ -128,13 +128,13 @@ export const AuthModal = ({ isOpen, onClose, defaultView = 'signin' }: AuthModal
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={loading}
-              className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="bg-gray-50 text-gray-900 border-gray-300"
             />
           </div>
 
           {view !== 'reset' && (
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium text-gray-900 dark:text-white">
+              <label htmlFor="password" className="text-sm font-medium text-gray-900">
                 Password
               </label>
               <Input
@@ -146,7 +146,7 @@ export const AuthModal = ({ isOpen, onClose, defaultView = 'signin' }: AuthModal
                 required
                 disabled={loading}
                 minLength={6}
-                className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="bg-gray-50 text-gray-900 border-gray-300"
               />
             </div>
           )}
@@ -161,16 +161,16 @@ export const AuthModal = ({ isOpen, onClose, defaultView = 'signin' }: AuthModal
                 <button
                   type="button"
                   onClick={() => handleViewChange('reset')}
-                  className="text-orange-600 dark:text-orange-400 hover:underline block w-full font-medium"
+                  className="text-orange-600 hover:text-orange-700 hover:underline block w-full font-medium"
                 >
                   Forgot password?
                 </button>
-                <div className="text-gray-700 dark:text-gray-300">
+                <div className="text-gray-600">
                   Don't have an account?{' '}
                   <button
                     type="button"
                     onClick={() => handleViewChange('signup')}
-                    className="text-orange-600 dark:text-orange-400 hover:underline font-medium"
+                    className="text-orange-600 hover:text-orange-700 hover:underline font-medium"
                   >
                     Sign up
                   </button>
@@ -179,12 +179,12 @@ export const AuthModal = ({ isOpen, onClose, defaultView = 'signin' }: AuthModal
             )}
 
             {view === 'signup' && (
-              <div className="text-gray-700 dark:text-gray-300">
+              <div className="text-gray-600">
                 Already have an account?{' '}
                 <button
                   type="button"
                   onClick={() => handleViewChange('signin')}
-                  className="text-orange-600 dark:text-orange-400 hover:underline font-medium"
+                  className="text-orange-600 hover:text-orange-700 hover:underline font-medium"
                 >
                   Sign in
                 </button>
@@ -195,7 +195,7 @@ export const AuthModal = ({ isOpen, onClose, defaultView = 'signin' }: AuthModal
               <button
                 type="button"
                 onClick={() => handleViewChange('signin')}
-                className="text-orange-600 dark:text-orange-400 hover:underline font-medium"
+                className="text-orange-600 hover:text-orange-700 hover:underline font-medium"
               >
                 Back to sign in
               </button>
