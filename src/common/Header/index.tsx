@@ -67,7 +67,7 @@ const Header = ({ onOpenSearch }: HeaderProps) => {
   return (
     <header
       className={cn(
-        `md:py-[16px] py-[14.5px]  fixed top-0 left-0 w-full z-10 transition-all duration-50`,
+        `md:py-[18px] py-[16px] fixed top-0 left-0 w-full z-10 transition-all duration-300`,
         isActive && (theme === "Dark" ? "header-bg--dark" : "header-bg--light")
       )}
     >
@@ -77,15 +77,15 @@ const Header = ({ onOpenSearch }: HeaderProps) => {
         <Logo
           logoColor={cn(
             isNotFoundPage
-              ? "text-black dark:text-white"
+              ? "text-charcoal dark:text-off-white"
               : !isNotFoundPage && isActive
-              ? "text-black dark:text-white"
-              : "text-white"
+              ? "text-charcoal dark:text-off-white"
+              : "text-off-white"
           )}
         />
 
-        <div className=" hidden md:flex flex-row gap-8 items-center text-gray-600 dark:text-gray-300">
-          <ul className="flex flex-row gap-8 capitalize text-[14.75px] font-medium">
+        <div className="hidden md:flex flex-row gap-6 items-center">
+          <ul className="flex flex-row gap-8 capitalize text-[14.75px] font-medium font-cyber">
             {navLinks.map((link: { title: string; path: string }) => {
               return (
                 <HeaderNavItem
@@ -98,23 +98,23 @@ const Header = ({ onOpenSearch }: HeaderProps) => {
             })}
           </ul>
 
-          {/* Search Button */}
+          {/* Search Button - Cyber Pastel Style */}
           <Button
             onPress={onOpenSearch}
             className={cn(
-              "flex items-center justify-center px-3 py-1.5 rounded-full transition-all duration-200 hover:scale-105 border border-gray-300 dark:border-gray-600",
+              "cyber-glow-ring flex items-center justify-center px-4 py-2 rounded-full transition-all duration-300 hover:scale-105 font-cyber font-medium",
               isNotFoundPage || isActive
-                ? "bg-white/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800"
-                : "bg-white/10 backdrop-blur-sm text-gray-300 hover:bg-white/20"
+                ? "bg-gradient-to-r from-baby-blue/20 to-lavender/20 dark:from-lavender/20 dark:to-soft-neon/20 text-charcoal dark:text-off-white border border-baby-blue/40 dark:border-lavender/40 hover:shadow-cyber-glow backdrop-blur-xl"
+                : "bg-off-white/10 backdrop-blur-md text-off-white hover:bg-off-white/20 border border-off-white/30 hover:shadow-lavender-glow"
             )}
           >
             <FiSearch className="w-4 h-4 mr-2" />
-            <span className="text-sm font-medium">Search</span>
+            <span className="text-sm">Search</span>
             <kbd className={cn(
-              "ml-2 px-1.5 py-0.5 text-xs font-mono rounded border text-[10px]",
+              "ml-2 px-2 py-1 text-xs font-mono rounded-lg border font-semibold",
               isNotFoundPage || isActive
-                ? "bg-gray-100 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-                : "bg-white/10 border-white/20 text-gray-300"
+                ? "bg-baby-blue/10 dark:bg-lavender/10 border-baby-blue/30 dark:border-lavender/30 text-charcoal/70 dark:text-off-white/70"
+                : "bg-off-white/10 border-off-white/20 text-off-white/80"
             )}>
               ⌘K
             </kbd>
@@ -127,13 +127,13 @@ const Header = ({ onOpenSearch }: HeaderProps) => {
               onClick={openMenu}
               id="theme"
               className={cn(
-                `flex items-center justify-center mb-[2px] transition-all duration-100 hover:scale-110`,
+                `cyber-glow-ring flex items-center justify-center p-2.5 rounded-full transition-all duration-300 hover:scale-110 hover:rotate-12`,
                 isNotFoundPage || isActive
-                  ? ` text-black dark:text-white dark:hover:text-gray-300 hover:text-gray-600 `
-                  : ` dark:hover:text-sec-color text-gray-300 `
+                  ? `bg-gradient-to-br from-pastel-cyan/20 to-lavender/20 dark:from-lavender/20 dark:to-soft-neon/20 text-charcoal dark:text-off-white border border-pastel-cyan/40 dark:border-lavender/40 hover:shadow-neon-soft`
+                  : `bg-off-white/10 backdrop-blur-md text-off-white hover:bg-off-white/20 border border-off-white/30 hover:shadow-lavender-glow`
               )}
             >
-              {theme === "Dark" ? <BsMoonStarsFill /> : <FiSun />}
+              {theme === "Dark" ? <BsMoonStarsFill className="text-lg" /> : <FiSun className="text-lg" />}
             </button>
             <AnimatePresence>
               {showThemeOptions && <ThemeMenu />}
@@ -145,10 +145,10 @@ const Header = ({ onOpenSearch }: HeaderProps) => {
           type="button"
           name="menu"
           className={cn(
-            `inline-block text-[22.75px] md:hidden  transition-all duration-300`,
+            `cyber-glow-ring inline-block text-[22.75px] md:hidden p-2 rounded-full transition-all duration-300 hover:scale-110`,
             isNotFoundPage || isActive
-              ? `text-black dark:text-white dark:hover:text-gray-300 hover:text-gray-600 `
-              : ` dark:hover:text-sec-color text-sec-color`
+              ? `bg-gradient-to-br from-baby-blue/20 to-lavender/20 dark:from-lavender/20 dark:to-soft-neon/20 text-charcoal dark:text-off-white border border-baby-blue/40 dark:border-lavender/40`
+              : `bg-off-white/10 backdrop-blur-md text-off-white border border-off-white/30`
           )}
           onClick={() => setShowSidebar(true)}
         >

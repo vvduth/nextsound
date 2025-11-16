@@ -40,17 +40,19 @@ const SideBar: React.FC = () => {
             exit="hidden"
             ref={ref}
             className={cn(
-              `fixed top-0 right-0 sm:w-[40%] xs:w-[220px] w-[195px] h-full z-25 overflow-y-auto shadow-md md:hidden p-4 pb-0 dark:text-gray-200 text-gray-600`,
-              theme === "Dark" ? "dark-glass" : "light-glass"
+              `cyber-glow-ring fixed top-0 right-0 sm:w-[40%] xs:w-[240px] w-[220px] h-full z-25 overflow-y-auto md:hidden p-6 pb-0 font-cyber`,
+              theme === "Dark" 
+                ? "bg-gradient-to-br from-charcoal/90 to-deep-dark/95 backdrop-blur-3xl border-l-2 border-lavender/30 text-off-white shadow-cyber-glow" 
+                : "bg-gradient-to-br from-off-white/90 to-baby-blue/20 backdrop-blur-3xl border-l-2 border-baby-blue/40 text-charcoal shadow-float"
             )}
           >
             <div className="flex items-center justify-center  ">
               <Logo />
             </div>
 
-            <div className="p-4 sm:pt-8  xs:pt-6 pt-[22px] h-full flex flex-col">
-              <h3 className={sideBarHeading}>Menu</h3>
-              <ul className="flex flex-col sm:gap-2 xs:gap-[6px] gap-1 capitalize xs:text-[14px] text-[13.5px] font-medium">
+            <div className="p-4 sm:pt-8 xs:pt-6 pt-[22px] h-full flex flex-col">
+              <h3 className={cn(sideBarHeading, "text-transparent bg-clip-text bg-gradient-to-r from-baby-blue via-lavender to-soft-neon font-bold tracking-wide")}>Menu</h3>
+              <ul className="flex flex-col sm:gap-3 xs:gap-2 gap-1.5 capitalize xs:text-[14px] text-[13.5px] font-semibold">
                 {navLinks.map((link: INavLink) => {
                   return (
                     <SidebarNavItem
@@ -62,15 +64,15 @@ const SideBar: React.FC = () => {
                 })}
               </ul>
 
-              <h3 className={cn(`mt-4 `, sideBarHeading)}>Theme</h3>
-              <ul className="flex flex-col sm:gap-2 xs:gap-[4px] gap-[2px] capitalize text-[14.75px] font-medium">
+              <h3 className={cn(`mt-6`, sideBarHeading, "text-transparent bg-clip-text bg-gradient-to-r from-pastel-cyan via-lavender to-glow-pink font-bold tracking-wide")}>Theme</h3>
+              <ul className="flex flex-col sm:gap-3 xs:gap-2 gap-1.5 capitalize text-[14.75px] font-semibold">
                 {themeOptions.map((theme) => {
                   return <ThemeOption theme={theme} key={theme.title} />;
                 })}
               </ul>
 
-              <p className="xs:text-[12px] text-[11.75px] mt-auto sm:mb-6 mb-[20px] text-center font-nunito dark:text-gray-200">
-                &copy; 2023 by tMovies. All right reserved.
+              <p className="xs:text-[12px] text-[11.75px] mt-auto sm:mb-6 mb-[20px] text-center font-cyber opacity-70">
+                &copy; 2025 NextSound. All rights reserved.
               </p>
             </div>
           </m.nav>

@@ -25,6 +25,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [tiltStyle, setTiltStyle] = useState({});
 
   const { poster_path, original_title: title, name, artist, album, duration } = track;
   const displayTitle = title || name || 'Unknown Track';
@@ -36,6 +37,27 @@ export const TrackCard: React.FC<TrackCardProps> = ({
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -5;
+    const rotateY = ((x - centerX) / centerX) * 5;
+
+    setTiltStyle({
+      transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`,
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTiltStyle({
+      transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)',
+    });
+    setIsHovered(false);
+  };
 
   const cardHeight = variant === 'compact' ? 'h-52' : variant === 'featured' ? 'h-84' : 'h-80';
   const imageHeight = variant === 'compact' ? 160 : variant === 'featured' ? 240 : 200;
@@ -43,25 +65,28 @@ export const TrackCard: React.FC<TrackCardProps> = ({
   return (
     <Card 
       className={cn(
-        "group relative transition-all duration-300 ease-out overflow-hidden",
-        "hover:scale-[1.03] hover:-translate-y-2 cursor-pointer",
-        "bg-white dark:bg-card-dark border-0",
-        "shadow-sm hover:shadow-card-hover",
-        "rounded-xl p-4",
+        "cyber-glow-ring group relative transition-all duration-300 ease-out overflow-hidden",
+        "cursor-pointer",
+        "bg-gradient-to-br from-off-white/80 to-baby-blue/10 dark:from-charcoal/80 dark:to-lavender/10",
+        "backdrop-blur-xl border-2 border-baby-blue/30 dark:border-lavender/30",
+        "shadow-float hover:shadow-float-hover",
+        "rounded-3xl p-4",
         cardHeight,
-        "w-[180px]", // Slightly wider for better proportions
+        "w-[180px]",
         className
       )}
+      style={tiltStyle}
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
     >
       {/* Main Content */}
       <div className="block relative h-full">
         {/* Image Container */}
-        <div className="relative overflow-hidden rounded-lg mb-3">
+        <div className="relative overflow-hidden rounded-2xl mb-3">
           {/* Loading skeleton */}
           {!imageLoaded && (
-            <div className="absolute inset-0 bg-gray-200 dark:bg-hover-gray animate-pulse rounded-lg" 
+            <div className="absolute inset-0 bg-gradient-to-br from-baby-blue/20 to-lavender/20 dark:from-pastel-cyan/10 dark:to-soft-neon/10 animate-pulse rounded-2xl holo-effect" 
                  style={{ height: imageHeight }} />
           )}
           
@@ -70,10 +95,8 @@ export const TrackCard: React.FC<TrackCardProps> = ({
             src={getImageUrl(poster_path)}
             alt={displayTitle}
             className={cn(
-              "w-full object-cover transition-all duration-300 rounded-lg",
-              "group-hover:scale-105",
-              "dark:brightness-75 dark:contrast-110 dark:saturate-90",
-              "dark:group-hover:brightness-90 dark:group-hover:contrast-105 dark:group-hover:saturate-95",
+              "w-full object-cover transition-all duration-500 rounded-2xl",
+              "group-hover:scale-110 group-hover:rotate-1",
               imageLoaded ? "opacity-100" : "opacity-0"
             )}
             style={{ height: imageHeight }}
@@ -81,9 +104,15 @@ export const TrackCard: React.FC<TrackCardProps> = ({
             loading="lazy"
           />
 
+          {/* Holographic overlay on hover */}
+          <div className={cn(
+            "absolute inset-0 holo-effect transition-opacity duration-500 rounded-2xl mix-blend-overlay",
+            isHovered ? "opacity-60" : "opacity-0"
+          )} />
+          
           {/* Gradient overlay on hover */}
           <div className={cn(
-            "absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent transition-opacity duration-300 rounded-lg",
+            "absolute inset-0 bg-gradient-to-t from-lavender/80 via-baby-blue/40 to-transparent transition-opacity duration-500 rounded-2xl",
             isHovered ? "opacity-100" : "opacity-0"
           )} />
         </div>
@@ -92,16 +121,16 @@ export const TrackCard: React.FC<TrackCardProps> = ({
         <CardContent className="p-0 space-y-2">
           {/* Track title */}
           <h3 className={cn(
-            "font-semibold text-gray-900 dark:text-text-primary truncate transition-colors duration-200",
+            "font-bold font-cyber text-charcoal dark:text-off-white truncate transition-all duration-300",
             variant === 'compact' ? "text-sm" : "text-base",
-            "group-hover:text-accent-orange dark:group-hover:text-accent-orange"
+            "group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-baby-blue group-hover:via-lavender group-hover:to-soft-neon"
           )}>
             {displayTitle}
           </h3>
           
           {/* Artist name */}
           <p className={cn(
-            "text-gray-600 dark:text-text-secondary truncate font-medium",
+            "text-charcoal/70 dark:text-off-white/70 truncate font-medium font-cyber",
             variant === 'compact' ? "text-xs" : "text-sm"
           )}>
             {artist || 'Unknown Artist'}
@@ -112,13 +141,13 @@ export const TrackCard: React.FC<TrackCardProps> = ({
             <div className="flex items-center justify-between pt-1">
               <div className="flex items-center space-x-2 flex-1 mr-2">
                 {album && (
-                  <span className="text-xs text-text-muted dark:text-text-secondary/70 truncate">
+                  <span className="text-xs text-charcoal/60 dark:text-off-white/60 truncate font-cyber">
                     {album}
                   </span>
                 )}
               </div>
               {duration && (
-                <div className="flex items-center text-xs text-text-muted dark:text-text-secondary/70 shrink-0">
+                <div className="flex items-center text-xs text-charcoal/60 dark:text-off-white/60 shrink-0 font-cyber">
                   <FaClock className="w-3 h-3 mr-1 opacity-60" />
                   {formatDuration(duration)}
                 </div>
@@ -128,11 +157,16 @@ export const TrackCard: React.FC<TrackCardProps> = ({
         </CardContent>
       </div>
 
-      {/* Hover glow effect */}
+      {/* Cyber glow effect */}
       <div className={cn(
-        "absolute -inset-1 bg-gradient-to-r from-spotify-green via-accent-orange to-warning-amber rounded-2xl opacity-0 transition-opacity duration-500 -z-10 blur-md",
-        "dark:bg-gradient-to-r dark:from-blue-800 dark:via-slate-600 dark:to-blue-800",
-        isHovered && "opacity-10"
+        "absolute -inset-1 bg-gradient-to-r from-baby-blue via-lavender to-soft-neon rounded-3xl opacity-0 transition-opacity duration-500 -z-10 blur-xl",
+        isHovered && "opacity-40 animate-glow-pulse"
+      )} />
+      
+      {/* Floating animation */}
+      <div className={cn(
+        "absolute inset-0 rounded-3xl transition-all duration-500",
+        isHovered && "shadow-holo"
       )} />
     </Card>
   );

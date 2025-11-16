@@ -130,34 +130,34 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
   return (
     <div className={cn(
-      "fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center pt-20",
+      "fixed inset-0 bg-charcoal/60 dark:bg-deep-dark/80 backdrop-blur-xl z-50 flex items-start justify-center pt-20",
       className
     )}>
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-2xl mx-4 max-h-96 flex flex-col overflow-hidden">
+      <div className="cyber-glow-ring bg-gradient-to-br from-off-white/95 to-baby-blue/20 dark:from-charcoal/95 dark:to-lavender/20 backdrop-blur-3xl rounded-3xl shadow-holo border-2 border-baby-blue/40 dark:border-lavender/40 w-full max-w-2xl mx-4 max-h-96 flex flex-col overflow-hidden">
         {/* Search Input */}
-        <div className="flex items-center px-4 py-4 border-b border-gray-200 dark:border-gray-700">
-          <FiSearch className="w-5 h-5 text-gray-400 mr-3" />
+        <div className="flex items-center px-6 py-5 border-b-2 border-pastel-cyan/30 dark:border-lavender/30">
+          <FiSearch className="w-5 h-5 text-baby-blue dark:text-lavender mr-3" />
           <input
             ref={inputRef}
             type="text"
             placeholder="Search music and artists..."
-            className="flex-1 text-gray-900 dark:text-white placeholder-gray-500 bg-transparent outline-none text-lg"
+            className="flex-1 text-charcoal dark:text-off-white placeholder-charcoal/50 dark:placeholder-off-white/50 bg-transparent outline-none text-lg font-cyber font-medium"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
           {query && (
             <Button
               onPress={() => setQuery('')}
-              className="ml-2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
+              className="ml-2 p-2 text-baby-blue hover:text-lavender dark:text-lavender dark:hover:text-soft-neon transition-all duration-200 hover:scale-110 rounded-full hover:bg-baby-blue/10 dark:hover:bg-lavender/10"
             >
               <FiX className="w-4 h-4" />
             </Button>
           )}
           <Button
             onPress={onClose}
-            className="ml-2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
+            className="ml-2 p-1 text-charcoal/60 dark:text-off-white/60 hover:text-charcoal dark:hover:text-off-white transition-colors duration-200"
           >
-            <kbd className="px-2 py-1 text-xs font-mono bg-gray-100 dark:bg-gray-800 rounded border">
+            <kbd className="px-2 py-1 text-xs font-cyber bg-baby-blue/10 dark:bg-lavender/10 rounded-lg border border-baby-blue/30 dark:border-lavender/30">
               ESC
             </kbd>
           </Button>
@@ -168,16 +168,16 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
           {/* Loading state */}
           {isLoading && (
             <div className="flex items-center justify-center py-8">
-              <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full"></div>
-              <span className="ml-2 text-gray-600 dark:text-gray-400">Searching...</span>
+              <div className="animate-spin w-6 h-6 border-2 border-baby-blue dark:border-lavender border-t-transparent rounded-full shadow-cyber-glow"></div>
+              <span className="ml-3 text-charcoal/70 dark:text-off-white/70 font-cyber">Searching...</span>
             </div>
           )}
 
           {/* Error state */}
           {error && (
             <div className="flex flex-col items-center justify-center py-8">
-              <div className="text-red-500 mb-2">⚠️</div>
-              <p className="text-red-600 dark:text-red-400 text-center">
+              <div className="text-4xl mb-2">⚠️</div>
+              <p className="text-glow-pink dark:text-soft-neon text-center font-cyber font-medium">
                 Search failed. Please try again.
               </p>
             </div>
@@ -189,27 +189,27 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
               {recentItems.length > 0 ? (
                 <>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    <h3 className="text-sm font-bold font-cyber text-transparent bg-clip-text bg-gradient-to-r from-baby-blue to-lavender uppercase tracking-wide">
                       Recent
                     </h3>
                     <Button
                       onPress={clearHistory}
-                      className="flex items-center gap-1.5 px-2 py-1 text-xs text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors duration-200"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-cyber text-charcoal/60 hover:text-glow-pink dark:text-off-white/60 dark:hover:text-soft-neon transition-all duration-200 hover:scale-105 rounded-full hover:bg-baby-blue/10 dark:hover:bg-lavender/10"
                     >
                       <FiTrash2 className="w-3 h-3" />
                       Clear
                     </Button>
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     {recentItems.map((item, _index) => {
                       const Icon = getItemIcon(item.type);
                       return (
                         <div
                           key={item.id}
-                          className="flex items-center p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors duration-200"
+                          className="cyber-glow-ring flex items-center p-3 rounded-2xl hover:bg-gradient-to-r hover:from-baby-blue/20 hover:to-pastel-cyan/20 dark:hover:from-lavender/20 dark:hover:to-soft-neon/20 cursor-pointer transition-all duration-300 hover:scale-[1.02] border border-baby-blue/20 dark:border-lavender/20"
                           onClick={() => handleItemSelect(item)}
                         >
-                          <div className="w-8 h-8 rounded overflow-hidden bg-gray-200 dark:bg-gray-700 mr-3 shrink-0">
+                          <div className="w-10 h-10 rounded-xl overflow-hidden bg-gradient-to-br from-baby-blue/30 to-lavender/30 dark:from-pastel-cyan/20 dark:to-soft-neon/20 mr-3 shrink-0 shadow-float">
                             {item.image ? (
                               <img
                                 src={item.image}

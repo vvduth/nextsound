@@ -66,17 +66,19 @@ const Section: FC<SectionProps> = ({
   const errorMessage = isError ? getErrorMessage(error) : "";
 
   const sectionStyle = cn(
-    `sm:py-[20px] xs:py-[18.75px] py-[16.75px] font-nunito`,
+    `sm:py-[20px] xs:py-[18.75px] py-[16.75px] font-cyber`,
     className
   );
 
   return (
     <ErrorBoundary>
       <section className={sectionStyle} ref={ref}>
-        <div className="flex flex-row justify-between items-center mb-[22.75px]">
-          <div className=" relative">
-            <h3 className="sm:text-[22.25px] xs:text-[20px] text-[18.75px] dark:text-gray-50 sm:font-bold font-semibold">{title}</h3>
-            <div className="line" />
+        <div className="flex flex-row justify-between items-center mb-[28px]">
+          <div className="relative">
+            <h3 className="sm:text-[24px] xs:text-[22px] text-[20px] font-extrabold font-cyber text-transparent bg-clip-text bg-gradient-to-r from-baby-blue via-lavender to-soft-neon dark:from-pastel-cyan dark:via-lavender dark:to-glow-pink tracking-tight">
+              {title}
+            </h3>
+            <div className="holo-line h-1 w-20 rounded-full bg-gradient-to-r from-baby-blue via-lavender to-soft-neon opacity-60 mt-2" />
           </div>
         </div>
         <div className={title === "Latest Hits" ? "min-h-[400px]" : "sm:h-[312px] xs:h-[309px] h-[266px]"}>
