@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useCallback } from 'react';
 import { useAudioPlayer } from '@/hooks/useAudioPlayer';
 import { ITrack } from '@/types';
 
@@ -21,6 +21,7 @@ interface AudioPlayerContextType {
   toggleFavorite: () => void;
   toggleMinimize: () => void;
   closePlayer: () => void;
+  setOnTrackEndCallback: (callback: () => void) => void;
 }
 
 const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(undefined);
@@ -30,10 +31,22 @@ interface AudioPlayerProviderProps {
 }
 
 export const AudioPlayerProvider: React.FC<AudioPlayerProviderProps> = ({ children }) => {
-  const audioPlayer = useAudioPlayer();
+  const [onTrackEndCallback, setOnTrackEndCallbackState] = React.useState<(() => void) | null>(null);
+  
+  const handleTrackEnd = useCallback(() => {
+    if (onTrackEndCallback) {
+      onTrackEndCallback();
+    }
+  }, [onTrackEndCallback]);
+
+  const audioPlayer = useAudioPlayer({ onTrackEnd: handleTrackEnd });
+
+  const setOnTrackEndCallback = useCallback((callback: () => void) => {
+    setOnTrackEndCallbackState(() => callback);
+  }, []);
 
   return (
-    <AudioPlayerContext.Provider value={audioPlayer}>
+    <AudioPlayerContext.Provider value={{ ...audioPlayer, setOnTrackEndCallback }}>
       {children}
     </AudioPlayerContext.Provider>
   );

@@ -12,10 +12,12 @@ import {
   FiHeart,
   FiMoreHorizontal,
   FiMinimize2,
-  FiMaximize2
+  FiMaximize2,
+  FiList
 } from 'react-icons/fi';
 import { ITrack } from '@/types';
 import { getImageUrl, cn } from '@/utils';
+import { useQueue } from '@/context/queueContext';
 
 interface MiniPlayerProps {
   currentTrack?: ITrack | null;
@@ -62,6 +64,8 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
   const [localProgress, setLocalProgress] = useState(progress);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+
+  const { toggleQueue, queue } = useQueue();
 
   const progressRef = useRef<HTMLDivElement>(null);
 
@@ -128,6 +132,19 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             className="flex items-center justify-center w-8 h-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors duration-200"
           >
             {isPlaying ? <FiPause className="w-4 h-4" /> : <FiPlay className="w-4 h-4 ml-0.5" />}
+          </Button>
+          <Button
+            onClick={toggleQueue}
+            variant="ghost"
+            size="icon"
+            className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-blue-600 dark:text-gray-500 dark:hover:text-blue-400 transition-colors duration-200 relative"
+          >
+            <FiList className="w-4 h-4" />
+            {queue.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                {queue.length > 9 ? '9+' : queue.length}
+              </span>
+            )}
           </Button>
           <Button
             onClick={onToggleMinimize}
@@ -329,6 +346,26 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
             className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors duration-200"
           >
             <FiMoreHorizontal className="w-4 h-4" />
+          </Button>
+
+          {/* Queue button */}
+          <Button
+            onClick={toggleQueue}
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "flex items-center justify-center w-8 h-8 transition-colors duration-200 relative",
+              queue.length > 0 
+                ? "text-blue-600 hover:text-blue-700" 
+                : "text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+            )}
+          >
+            <FiList className="w-4 h-4" />
+            {queue.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                {queue.length > 9 ? '9+' : queue.length}
+              </span>
+            )}
           </Button>
 
           {/* Minimize */}

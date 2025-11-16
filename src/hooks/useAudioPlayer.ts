@@ -12,7 +12,11 @@ interface AudioPlayerState {
   isMinimized: boolean;
 }
 
-export const useAudioPlayer = () => {
+interface UseAudioPlayerProps {
+  onTrackEnd?: () => void;
+}
+
+export const useAudioPlayer = (props?: UseAudioPlayerProps) => {
   const [state, setState] = useState<AudioPlayerState>({
     currentTrack: null,
     isPlaying: false,
@@ -24,8 +28,8 @@ export const useAudioPlayer = () => {
   });
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const progressInterval = useRef<NodeJS.Timeout | null>(null);
-  const simulationInterval = useRef<NodeJS.Timeout | null>(null);
+  const progressInterval = useRef<number | null>(null);
+  const simulationInterval = useRef<number | null>(null);
 
   // Initialize audio element
   useEffect(() => {
@@ -34,6 +38,13 @@ export const useAudioPlayer = () => {
     const audio = audioRef.current;
     
     const handleEnded = () => {
+      console.log('Track ended, checking for next track...');
+      
+      // Call the onTrackEnd callback if provided
+      if (props?.onTrackEnd) {
+        props.onTrackEnd();
+      }
+      
       setState(prev => ({ ...prev, isPlaying: false, progress: 0 }));
     };
     
@@ -72,7 +83,7 @@ export const useAudioPlayer = () => {
   // Update progress
   useEffect(() => {
     if (state.isPlaying && audioRef.current) {
-      progressInterval.current = setInterval(() => {
+      progressInterval.current = window.setInterval(() => {
         const audio = audioRef.current;
         if (audio && audio.duration) {
           const currentProgress = (audio.currentTime / audio.duration) * 100;
@@ -245,7 +256,7 @@ export const useAudioPlayer = () => {
     function startSimulation() {
       // Simulate progress for tracks without preview URLs
       let simulatedProgress = 0;
-      simulationInterval.current = setInterval(() => {
+      simulationInterval.current = window.setInterval(() => {
         simulatedProgress += 1;
         setState(prev => ({ ...prev, progress: simulatedProgress }));
 
@@ -282,7 +293,7 @@ export const useAudioPlayer = () => {
         // Restart simulation for tracks without preview URLs
         console.log('Resuming simulation playback');
         let simulatedProgress = state.progress;
-        simulationInterval.current = setInterval(() => {
+        simulationInterval.current = window.setInterval(() => {
           simulatedProgress += 1;
           setState(prev => ({ ...prev, progress: simulatedProgress }));
 

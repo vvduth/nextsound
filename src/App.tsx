@@ -11,6 +11,11 @@ import {
   DemoModeBadge,
 } from "@/common";
 import { CommandPalette } from "@/components/ui/CommandPalette";
+import { QueuePanel } from "@/components/ui/QueuePanel";
+import { MiniPlayer } from "@/components/ui/MiniPlayer";
+import { FloatingQueueButton } from "@/components/ui/FloatingQueueButton";
+import { QueueIntegration } from "@/components/QueueIntegration";
+import { useAudioPlayerContext } from "@/context/audioPlayerContext";
 
 import "react-loading-skeleton/dist/skeleton.css";
 import "swiper/css";
@@ -20,6 +25,24 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 
 const App = () => {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const {
+    currentTrack,
+    isPlaying,
+    progress,
+    volume,
+    isShuffled,
+    repeatMode,
+    isMinimized,
+    togglePlay,
+    skipPrevious,
+    skipNext,
+    seek,
+    setVolume,
+    toggleShuffle,
+    toggleRepeat,
+    toggleFavorite,
+    toggleMinimize,
+  } = useAudioPlayerContext();
 
   // Global keyboard shortcuts
   useEffect(() => {
@@ -37,6 +60,9 @@ const App = () => {
 
   return (
     <>
+      {/* Queue Integration - connects queue with audio player */}
+      <QueueIntegration />
+      
       <SideBar />
       <Header onOpenSearch={() => setIsCommandPaletteOpen(true)} />
       <DemoModeBadge />
@@ -65,6 +91,32 @@ const App = () => {
         onItemSelect={() => {
           // Item selection handled by CommandPalette component
         }}
+      />
+
+      {/* Queue Panel */}
+      <QueuePanel />
+
+      {/* Floating Queue Button - shows when no track is playing */}
+      <FloatingQueueButton />
+
+      {/* Mini Player */}
+      <MiniPlayer
+        currentTrack={currentTrack}
+        isPlaying={isPlaying}
+        progress={progress}
+        volume={volume}
+        isShuffled={isShuffled}
+        repeatMode={repeatMode}
+        isMinimized={isMinimized}
+        onTogglePlay={togglePlay}
+        onSkipPrevious={skipPrevious}
+        onSkipNext={skipNext}
+        onSeek={seek}
+        onVolumeChange={setVolume}
+        onToggleShuffle={toggleShuffle}
+        onToggleRepeat={toggleRepeat}
+        onToggleFavorite={toggleFavorite}
+        onToggleMinimize={toggleMinimize}
       />
 
       <Footer />

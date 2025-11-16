@@ -371,6 +371,16 @@ body {
   animation: float 6s ease-in-out infinite;
 }
 
+/* Glow pulse animation */
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
 /* Holographic line effect */
 .holo-line {
   position: relative;
@@ -390,6 +400,12 @@ body {
 
 @keyframes holo-line-move {
   to { left: 100%; }
+}
+
+@keyframes holo-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 /* Dark mode image styling - softer cyber aesthetic */
